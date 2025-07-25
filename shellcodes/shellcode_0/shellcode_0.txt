@@ -1,0 +1,3 @@
+msfvenom -p windows/x64/exec CMD=calc.exe -f raw -o shellcode_0.bin
+
+Framework Version: 6.4.76-dev-
