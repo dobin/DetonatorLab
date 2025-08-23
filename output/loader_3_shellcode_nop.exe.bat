@@ -1,0 +1,1 @@
+cl.exe /nologo /MT /W0 /GS- /DNDEBUG /Tcoutput\loader_3_shellcode_nop.c /link /OUT:output\loader_3_shellcode_nop.exe /SUBSYSTEM:CONSOLE /MACHINE:x64

