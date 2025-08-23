@@ -24,8 +24,7 @@ def ImportLoaders():
                     loaders[module_name_short] = module
                 except ImportError as e:
                     print(f"Error importing {module_name}: {e}")
-                print(f"Loaded: {module_name_short}")
-
+                #print(f"Loaded: {module_name_short}")
 
 
 def merge(loader, shellcode):
