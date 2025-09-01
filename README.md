@@ -39,4 +39,6 @@ Result in `C:\DetonatorLab\output\loader_6_shellcode_3.exe`.
 | loader_4 | multibyte-xor patched | RW→RWX     | jmp           | \-                 |
 | loader_5 | multibyte-xor patched | RW→RWX     | jmp           | register time      |
 | loader_6 | multibyte-xor patched | RW→RX      | jmp           | register time      |
-
+|          |                       |            |               |                    |
+| loader_7 | multiprocess .shared |       |            |       |
+| loader_8 | multiprocess dynamic mem |       |            |       |
