@@ -1,1 +1,0 @@
-cl.exe /nologo /MT /W0 /GS- /DNDEBUG /Tcoutput\loader_1_shellcode_1.c /link /OUT:output\loader_1_shellcode_1.exe /SUBSYSTEM:CONSOLE /MACHINE:x64
