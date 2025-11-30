@@ -60,11 +60,19 @@ def merge(loader, shellcode):
 
 def compile(filepath):
     module_c = os.path.join(OUTPUT_DIR, filepath)
-    module_exe = os.path.join(OUTPUT_DIR, os.path.splitext(os.path.basename(filepath))[0] + '.exe')
+    module_out = os.path.join(OUTPUT_DIR, os.path.splitext(os.path.basename(filepath))[0] + '.exe')
     
     # Check if there's a corresponding .rc file
     module_rc = os.path.join(OUTPUT_DIR, 'payload.rc')
     module_res = os.path.join(OUTPUT_DIR, 'payload.res')
+
+    # Standard compile flags
+    compile_flags = "/nologo /MT /W0 /GS- /DNDEBUG"
+
+    # check if DLL
+    if '_dll' in filepath:
+        compile_flags += " /LD"
+        module_out = module_out.replace('.exe', '.dll')
     
     rc_cmd = None
     # Compile the resource file if it exists
@@ -77,16 +85,16 @@ def compile(filepath):
             sys.exit(1)
         
         # Compile C file with resource file
-        cmd = "cl.exe /nologo /MT /W0 /GS- /DNDEBUG /Tc{} {} /link /OUT:{} /SUBSYSTEM:CONSOLE /MACHINE:x64".format(
-            module_c, module_res, module_exe
+        cmd = "cl.exe {} /Tc{} {} /link /OUT:{} /SUBSYSTEM:CONSOLE /MACHINE:x64".format(
+            compile_flags, module_c, module_res, module_out
         )
     else:
         # Compile C file without resource file (original behavior)
-        cmd = "cl.exe /nologo /MT /W0 /GS- /DNDEBUG /Tc{} /link /OUT:{} /SUBSYSTEM:CONSOLE /MACHINE:x64".format(
-            module_c, module_exe
+        cmd = "cl.exe {} /Tc{} /link /OUT:{} /SUBSYSTEM:CONSOLE /MACHINE:x64".format(
+            compile_flags, module_c, module_out
         )
 
-    print("Compiling: {} into {}".format(module_c, module_exe))
+    print("Compiling: {} into {}".format(module_c, module_out))
     result = subprocess.run(cmd, shell=True)
     if result.returncode != 0:
         print("Error executing command: " + cmd)
