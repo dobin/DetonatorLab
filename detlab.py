@@ -69,10 +69,15 @@ def compile(filepath):
     # Standard compile flags
     compile_flags = "/nologo /MT /W0 /GS- /DNDEBUG"
 
+    # Standard link libraries
+    link_libs = " user32.lib"  # for MessageBoxA
+    #link_libs = ""
+
     # check if DLL
     if '_dll' in filepath:
         compile_flags += " /LD"
         module_out = module_out.replace('.exe', '.dll')
+        
     
     rc_cmd = None
     # Compile the resource file if it exists
@@ -85,13 +90,13 @@ def compile(filepath):
             sys.exit(1)
         
         # Compile C file with resource file
-        cmd = "cl.exe {} /Tc{} {} /link /OUT:{} /SUBSYSTEM:CONSOLE /MACHINE:x64".format(
-            compile_flags, module_c, module_res, module_out
+        cmd = "cl.exe {} /Tc{} {} /link /OUT:{} /SUBSYSTEM:CONSOLE /MACHINE:x64{}".format(
+            compile_flags, module_c, module_res, module_out, link_libs
         )
     else:
         # Compile C file without resource file (original behavior)
-        cmd = "cl.exe {} /Tc{} /link /OUT:{} /SUBSYSTEM:CONSOLE /MACHINE:x64".format(
-            compile_flags, module_c, module_out
+        cmd = "cl.exe {} /Tc{} /link /OUT:{} /SUBSYSTEM:CONSOLE /MACHINE:x64{}".format(
+            compile_flags, module_c, module_out, link_libs
         )
 
     print("Compiling: {} into {}".format(module_c, module_out))
