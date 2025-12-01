@@ -38,6 +38,8 @@ def prepare(loader, shellcode):
         return None
     loader_converter = loaders[loader]
 
+    print("Merging loader '{}' with shellcode '{}'".format(loader, shellcode))
+
     # C source file
     template_shellcode = loader_converter.convert(shellcode_raw)
     loader_template = loader_template.replace('{{SHELLCODE}}', template_shellcode)
@@ -46,8 +48,12 @@ def prepare(loader, shellcode):
     with open(os.path.join(OUTPUT_DIR, filename), 'w') as f:
         f.write(loader_template)
 
+    print(f"Generated C source file: {filename}")
+
     # Optional: resource file
     if hasattr(loader_converter, 'get_rc_file'):
+        print(f"Generating resource file for {loader}")
+        
         rc_content, encrypted_shellcode = loader_converter.get_rc_file(shellcode_raw)
         rc_filename = f'payload.rc'
         with open(os.path.join(OUTPUT_DIR, rc_filename), 'w') as f:
@@ -55,6 +61,9 @@ def prepare(loader, shellcode):
         bin_filename = 'payload.bin'
         with open(os.path.join(OUTPUT_DIR, bin_filename), 'wb') as f:
             f.write(encrypted_shellcode)
+
+        print(f"  rc_filename: {rc_filename}")
+        print(f"  bin_filename: {bin_filename}")
 
     return basename
 
@@ -141,7 +150,6 @@ def main():
     if not basename:
         print("Merging failed.")
         sys.exit(1)
-    cleanup(basename)
 
     compile(basename)
 
