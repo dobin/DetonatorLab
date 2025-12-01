@@ -18,7 +18,7 @@ Usage: python detlab.py <loader> <shellcode>
 ** Visual Studio 2022 Developer PowerShell v17.12.4
 ** Copyright (c) 2022 Microsoft Corporation
 **********************************************************************
-PS C:\Program Files\Microsoft Visual Studio\2022\Community> cd C:\DetonatorLab
+
 PS C:\DetonatorLab> python.exe detlab.py loader_6 shellcode_3
 Compiling: output\loader_6_shellcode_3.c into output\loader_6_shellcode_3.exe
 loader_6_shellcode_3.c
@@ -29,16 +29,18 @@ Result in `C:\DetonatorLab\output\loader_6_shellcode_3.exe`.
 
 ## Existing Loaders
 
-| **Loader**   | **Encryption**        | **Memory** | **Execution** | **Anti-Emulation** |
-| -------- | --------------------- | ---------- | ------------- | ------------------ |
-| loader_0 | \-                    | RWX        | jmp           | \-                 |
-| loader_1 | multibyte-xor         | RW→RWX     | jmp           | \-                 |
-| loader_2 | multibyte-xor         | RW→RWX     | jmp           | register time      |
-| loader_3 | multibyte-xor         | RW→RWX     | jmp           | sirallocalot       |
-|          |                       |            |               |                    |
-| loader_4 | multibyte-xor patched | RW→RWX     | jmp           | \-                 |
-| loader_5 | multibyte-xor patched | RW→RWX     | jmp           | register time      |
-| loader_6 | multibyte-xor patched | RW→RX      | jmp           | register time      |
-|          |                       |            |               |                    |
-| loader_7 | multiprocess .shared |       |            |       |
-| loader_8 | multiprocess dynamic mem |       |            |       |
+| **Loader**    | **Payload Location** | **Encryption**           | **Memory** | **Execution** | **Anti-Emulation** | **Output** |
+|---------------|----------------------|--------------------------|------------|---------------|--------------------|------------|
+| loader_0      | .data                | \-                       | RWX        | jmp           | \-                 | exe        |
+| loader_1      | .data                | multibyte-xor            | RW→RWX     | jmp           | \-                 | exe        |
+| loader_2      | .data                | multibyte-xor            | RW→RWX     | jmp           | register time      | exe        |
+| loader_3      | .data                | multibyte-xor            | RW→RWX     | jmp           | sirallocalot       | exe        |
+|               |                      |                          |            |               |                    |            |
+| loader_4      | .data                | multibyte-xor patched    | RW→RWX     | jmp           | \-                 | exe        |
+| loader_5      | .data                | multibyte-xor patched    | RW→RWX     | jmp           | register time      | exe        |
+| loader_5a     | .rsrc                | multibyte-xor patched    | RW→RWX     | jmp           | register time      | exe        |
+| loader_5a_dll | .rsrc                | multibyte-xor patched    | RW→RWX     | jmp           | register time      | dll        |
+| loader_6      | .data                | multibyte-xor patched    | RW→RX      | jmp           | register time      | exe        |
+|               |                      |                          |            |               |                    |            |
+| loader_10     |                      | multiprocess .shared     |            |               |                    | exe        |
+| loader_11     |                      | multiprocess dynamic mem |            |               |                    | exe        |
