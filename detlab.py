@@ -27,7 +27,7 @@ def ImportLoaders():
                 #print(f"Loaded: {module_name_short}")
 
 
-def merge(loader, shellcode):
+def prepare(loader, shellcode):
     with open(f'loader/{loader}/{loader}.c', 'r') as f:
         loader_template: str = f.read()
     with open(f'shellcodes/{shellcode}/{shellcode}.bin', 'rb') as f:
@@ -41,7 +41,8 @@ def merge(loader, shellcode):
     # C source file
     template_shellcode = loader_converter.convert(shellcode_raw)
     loader_template = loader_template.replace('{{SHELLCODE}}', template_shellcode)
-    filename = f'{loader}_{shellcode}.c'
+    basename = f'{loader}_{shellcode}'
+    filename = f'{basename}.c'
     with open(os.path.join(OUTPUT_DIR, filename), 'w') as f:
         f.write(loader_template)
 
@@ -55,33 +56,31 @@ def merge(loader, shellcode):
         with open(os.path.join(OUTPUT_DIR, bin_filename), 'wb') as f:
             f.write(encrypted_shellcode)
 
-    return filename
+    return basename
 
 
-def compile(filepath):
-    module_c = os.path.join(OUTPUT_DIR, filepath)
-    module_out = os.path.join(OUTPUT_DIR, os.path.splitext(os.path.basename(filepath))[0] + '.exe')
+def compile(basename):
+    module_c = os.path.join(OUTPUT_DIR, basename + '.c')
+    module_out = os.path.join(OUTPUT_DIR, basename + '.exe')
     
-    # Check if there's a corresponding .rc file
-    module_rc = os.path.join(OUTPUT_DIR, 'payload.rc')
-    module_res = os.path.join(OUTPUT_DIR, 'payload.res')
-
     # Standard compile flags
     compile_flags = "/nologo /MT /W0 /GS- /DNDEBUG"
 
     # Standard link libraries
     link_libs = " user32.lib"  # for MessageBoxA
-    #link_libs = ""
 
     # check if DLL
-    if '_dll' in filepath:
+    if '_dll' in basename:
         compile_flags += " /LD"
         module_out = module_out.replace('.exe', '.dll')
         
-    
-    rc_cmd = None
-    # Compile the resource file if it exists
+    # Check if resource file exists and compile accordingly
+    # payload.rc is created by merge() before
+    module_rc = os.path.join(OUTPUT_DIR, 'payload.rc')
     if os.path.exists(module_rc):
+        module_res = os.path.join(OUTPUT_DIR, 'payload.res')
+
+        # compile the resource file
         print(f"Compiling resource file: {module_rc}")
         rc_cmd = f"rc.exe /nologo {module_rc}"
         result = subprocess.run(rc_cmd, shell=True)
@@ -106,6 +105,20 @@ def compile(filepath):
         sys.exit(1)
 
 
+def cleanup(basename):
+    files = [
+        basename + ".exp",
+        basename + ".lib",
+        basename + ".obj",
+        os.path.join(OUTPUT_DIR, 'payload.rc'),
+        os.path.join(OUTPUT_DIR, 'payload.res'),
+        os.path.join(OUTPUT_DIR, 'payload.bin'),
+    ]
+    for file in files:
+        if os.path.exists(file):
+            os.remove(file)
+
+
 def main():
     ImportLoaders()
 
@@ -124,8 +137,15 @@ def main():
         print(f"Loader {loader} not found.")
         sys.exit(1)
 
-    filename = merge(loader, shellcode)
-    compile(filename)
+    basename = prepare(loader, shellcode)
+    if not basename:
+        print("Merging failed.")
+        sys.exit(1)
+    cleanup(basename)
+
+    compile(basename)
+
+    cleanup(basename)
     #execute(name)
 
 
