@@ -2,6 +2,7 @@ import subprocess
 import os
 import sys
 import importlib
+import shutil
 
 loaders = {}
 
@@ -68,7 +69,57 @@ def prepare(loader, shellcode):
     return basename
 
 
+def setup_msvc_env():
+    program_files_x86 = os.environ.get('ProgramFiles(x86)', r'C:\Program Files (x86)')
+    vswhere = os.path.join(program_files_x86, 'Microsoft Visual Studio', 'Installer', 'vswhere.exe')
+
+    if not os.path.isfile(vswhere):
+        raise RuntimeError(
+            "Could not find vswhere.exe. Install Visual Studio 2019/2022 with the 'Desktop development with C++' workload."
+        )
+
+    result = subprocess.run(
+        [
+            vswhere,
+            '-latest',
+            '-products', '*',
+            '-requires', 'Microsoft.VisualStudio.Component.VC.Tools.x86.x64',
+            '-property', 'installationPath',
+        ],
+        capture_output=True,
+        text=True,
+    )
+    vs_install = result.stdout.strip()
+    if result.returncode != 0 or not vs_install:
+        raise RuntimeError(
+            "Could not find an MSVC x64 toolchain. Install Visual Studio 2019/2022 with the 'Desktop development with C++' workload."
+        )
+
+    # If multiple lines are returned, take the last/first valid path
+    vs_install = vs_install.splitlines()[0].strip()
+    dev_cmd = os.path.join(vs_install, 'Common7', 'Tools', 'VsDevCmd.bat')
+    if not os.path.isfile(dev_cmd):
+        raise RuntimeError(f"Visual Studio developer command script not found: {dev_cmd}")
+
+    comspec = os.environ.get('ComSpec', 'cmd.exe')
+    env_cmd = f'{comspec} /d /s /c "call "{dev_cmd}" -arch=x64 >nul && set"'
+    env_result = subprocess.run(env_cmd, capture_output=True, text=True, shell=False)
+    if env_result.returncode != 0:
+        raise RuntimeError("VsDevCmd.bat failed while configuring the x64 build environment.")
+
+    for line in env_result.stdout.splitlines():
+        if '=' in line:
+            key, _, value = line.partition('=')
+            if key:
+                os.environ[key] = value
+
+    cl_path = shutil.which('cl.exe') or 'cl.exe'
+    print(f"Using compiler: {cl_path}")
+
+
 def compile(basename):
+    setup_msvc_env()
+
     module_c = os.path.join(OUTPUT_DIR, basename + '.c')
     module_out = os.path.join(OUTPUT_DIR, basename + '.exe')
     
