@@ -1,0 +1,6 @@
+Payload Location: .rsrc
+Encryption: multibyte-xor patched
+Memory: RW→RWX
+Execution: jmp
+Anti-Emulation: register time
+Output: dll

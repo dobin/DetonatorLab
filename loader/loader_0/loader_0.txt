@@ -1,0 +1,6 @@
+Payload Location: .data
+Encryption: none
+Memory: RWX
+Execution: jmp
+Anti-Emulation: none
+Output: exe

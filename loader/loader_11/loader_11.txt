@@ -1,0 +1,6 @@
+Payload Location: not specified
+Encryption: multiprocess dynamic mem
+Memory: not specified
+Execution: not specified
+Anti-Emulation: not specified
+Output: exe

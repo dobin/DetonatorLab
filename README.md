@@ -14,6 +14,8 @@ Usage: python detlab.py <loader> <shellcode>
 * **Shellcode**: one of `shellcode/`
 
 ```
+PS> & "C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\Tools\Launch-VsDevShell.ps1" -Arch amd64
+
 **********************************************************************
 ** Visual Studio 2022 Developer PowerShell v17.12.4
 ** Copyright (c) 2022 Microsoft Corporation
@@ -44,3 +46,17 @@ Result in `C:\DetonatorLab\output\loader_6_shellcode_3.exe`.
 |               |                      |                          |            |               |                    |            |
 | loader_10     |                      | multiprocess .shared     |            |               |                    | exe        |
 | loader_11     |                      | multiprocess dynamic mem |            |               |                    | exe        |
+
+
+## Existing Shellcodes
+
+| **Shellcode** | **Origin** |
+|---------------|------------|
+| shellcode_0 | Metasploit `windows/x64/exec` payload (`CMD=calc.exe`) |
+| shellcode_1 | Metasploit `windows/x64/meterpreter_reverse_tcp` payload |
+| shellcode_2 | Metasploit `windows/x64/meterpreter_reverse_http` payload |
+| shellcode_3 | Metasploit PR #19975 `windows/x64/meterpreter_reverse_tcp` payload |
+| shellcode_nop | Python-generated 200-byte NOP sequence |
+
+The source details for each entry are retained in
+`shellcodes/<shellcode_name>/<shellcode_name>.txt`.

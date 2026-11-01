@@ -1,0 +1,6 @@
+Payload Location: .data
+Encryption: multibyte-xor patched
+Memory: RW→RX
+Execution: jmp
+Anti-Emulation: register time
+Output: exe
