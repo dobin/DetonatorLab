@@ -1,0 +1,44 @@
+shellcode_100 -- Defender memory-scan (EMS / ARHSTR_EXT) trigger
+
+Purpose
+  Proves that Defender's in-memory HSTR scan flags a private RWX region when
+  it contains a shellcode pattern from SIGNATURE_TYPE_ARHSTR_EXT (0xc5).
+  The sample is NOT a working payload: it runs a short spin loop and returns.
+
+Layout (177 bytes)
+  +0x00  16 x 90              NOP sled
+  +0x10  b9 00 00 00 05       mov ecx, 0x05000000
+  +0x15  f3 90                pause
+  +0x17  ff c9                dec ecx
+  +0x19  75 fa                jnz  -6 (back to pause)
+  +0x1b  c3                   ret
+  +0x1c  149 bytes            materialised ARHSTR_EXT rules (memory-only)
+
+  The target never executes the appended bytes: the stub returns first.
+  They only have to exist in the scanned region.
+
+Signature source
+  VDM record  : mpavbase.vdm+0x1dc5f36
+  sigsha      : e1cf2582d590619ebbd0ae5216925d9a47e6eec6
+  type        : SIGNATURE_TYPE_ARHSTR_EXT (0xc5)
+  threat      : Trojan:Win32/Meterpreter.A!!Meterpreter.gen!A
+  rules       : 3 (x64 PEB/Ldr walk, block_api, hash 0x6a6f7213), threshold 3
+
+Regenerate the trigger bytes
+  python tools\vdm_extract.py materialize <mpavbase.vdm> ^
+      --delta <mpavdlta.vdm> ^
+      --sigsha e1cf2582d590619ebbd0ae5216925d9a47e6eec6 -o trigger.bin
+
+Expected results (mpclient host)
+  File scan : CLEAN (ARHSTR_EXT is an in-memory set, not a file set)
+  EMS scan  :
+  .\mpengine_client.exe bm ems --payload shellcode_100.bin --engine-log --no-elevate
+  Engine: EMS detection: Trojan:Win32/Meterpreter.A!!Meterpreter.gen!A,
+          sigsha=e1cf2582d590619ebbd0ae5216925d9a47e6eec6
+  bm ems report: status=2 (suspicious)
+
+Notes
+  - The region must be reachable by the engine's bounded VirtualQueryEx walk.
+    bm_helper allocates at 0x50000000 (prints low=1).
+  - For a real in-process run use loader_0; C:\Repos is excluded from Defender
+    file scanning, but the loaded RWX region is still memory-scanned.

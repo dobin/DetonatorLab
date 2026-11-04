@@ -41,11 +41,15 @@ Result in `C:\DetonatorLab\output\loader_6_shellcode_3.exe`.
 | loader_4      | .data                | multibyte-xor patched    | RW→RWX     | jmp           | \-                 | exe        |
 | loader_5      | .data                | multibyte-xor patched    | RW→RWX     | jmp           | register time      | exe        |
 | loader_5a     | .rsrc                | multibyte-xor patched    | RW→RWX     | jmp           | register time      | exe        |
+| loader_5a     | .rsrc                | multibyte-xor patched    | RW→RWX     | CreateThread  | register time      | exe        |
 | loader_5a_dll | .rsrc                | multibyte-xor patched    | RW→RWX     | jmp           | register time      | dll        |
 | loader_6      | .data                | multibyte-xor patched    | RW→RX      | jmp           | register time      | exe        |
+| loader_6a     | .data                | multibyte-xor patched    | RW→RX      | CreateThread  | register time      | exe        |
 |               |                      |                          |            |               |                    |            |
 | loader_10     |                      | multiprocess .shared     |            |               |                    | exe        |
 | loader_11     |                      | multiprocess dynamic mem |            |               |                    | exe        |
+|               |                      |                          |            |               |                    |            |
+| loader_20     | .data                | multibyte-xor patched    | RWX remote | CreateRemoteThread | register time  | exe        |
 
 
 ## Existing Shellcodes
@@ -56,6 +60,7 @@ Result in `C:\DetonatorLab\output\loader_6_shellcode_3.exe`.
 | shellcode_1 | Metasploit `windows/x64/meterpreter_reverse_tcp` payload |
 | shellcode_2 | Metasploit `windows/x64/meterpreter_reverse_http` payload |
 | shellcode_3 | Metasploit PR #19975 `windows/x64/meterpreter_reverse_tcp` payload |
+| shellcode_30 | NOP/spin/ret stub + materialised `ARHSTR_EXT` memory-scan trigger (Defender EMS) |
 | shellcode_nop | Python-generated 200-byte NOP sequence |
 
 The source details for each entry are retained in

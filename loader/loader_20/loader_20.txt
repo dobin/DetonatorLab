@@ -1,0 +1,13 @@
+Payload Location: .data
+Encryption: multibyte-xor patched
+Memory: RWX (remote)
+Execution: CreateRemoteThread
+Anti-Emulation: register time
+Injection: remote process (RuntimeBroker.exe)
+Output: exe
+
+Process injection loader based on loader_5.
+Spawns RuntimeBroker.exe in suspended state, allocates RWX memory
+in the remote process, writes decrypted shellcode via WriteProcessMemory,
+and executes it via CreateRemoteThread.
+Waits up to 10 seconds, then terminates the child process and exits.
